@@ -17,6 +17,12 @@ import {
 } from "react-icons/fa";
 import Hyperspeed from "./Hyperspeed";
 import "./App.css";
+import aayrahImg from "./assets/images/aayrah.png";
+import lubImg from "./assets/images/lub.png";
+import arpitImg from "./assets/images/arpit.png";
+import parthrahiImg from "./assets/images/parthrahi.png";
+import airbnbImg from "./assets/images/airbnb.png";
+import kvsImg from "./assets/images/kvs.png";
 
 const navItems = [
   { label: "Home", href: "#home" },
@@ -42,52 +48,56 @@ const skills = [
 
 const projects = [
   {
-    name: "Airbnb Clone",
-    image:
-      "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80",
+    name: "Aayrah Tech Workshop",
+    image: aayrahImg,
     description:
-      "A premium booking experience with property discovery, filters, responsive listings, and a polished checkout flow.",
-    stack: ["React", "Node", "MongoDB", "Express"],
+      "A registration-focused landing page for a training workshop with premium hero content, strong CTAs, and polished UI flow.",
+    stack: ["HTML", "CSS", "JavaScript", "Node.js"],
     github: "https://github.com/",
     live: "https://example.com/",
   },
   {
-    name: "Workshop Registration Platform",
-    image:
-      "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80",
+    name: "Industrial Lubrication System",
+    image: lubImg,
     description:
-      "A structured event registration system with attendee onboarding, admin controls, and smooth registration UX.",
-    stack: ["React", "Tailwind", "API", "Motion"],
+      "An industrial product website showcasing lubrication systems, quotation flow, and a clear service-led presentation.",
+    stack: ["React", "Responsive UI", "Branding", "Layout"],
     github: "https://github.com/",
     live: "https://example.com/",
   },
   {
-    name: "Portfolio Website",
-    image:
-      "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80",
+    name: "Optimize with Arpit",
+    image: arpitImg,
     description:
-      "A cinematic personal brand site built with layered motion, glassmorphism cards, and full responsiveness.",
-    stack: ["React", "Framer Motion", "CSS", "Icons"],
+      "A marketing-focused portfolio for a growth consultant, built to highlight services, credibility, and conversion.",
+    stack: ["HTML", "CSS", "Performance", "UI/UX"],
+    github: "https://github.com/",
+    live: "https://example.com/",
+  },
+  {
+    name: "Parth Rahi",
+    image: parthrahiImg,
+    description:
+      "A mobility and ride-booking concept with a bold hero, simple navigation, and app-download style actions.",
+    stack: ["React", "Landing Page", "Motion", "Branding"],
+    github: "https://github.com/",
+    live: "https://example.com/",
+  },
+  {
+    name: "Mini Airbnb",
+    image: airbnbImg,
+    description:
+      "A listings experience inspired by Airbnb, with browseable cards, destination imagery, and a clean marketplace feel.",
+    stack: ["React", "Listings", "MongoDB", "Express"],
     github: "https://github.com/",
     live: "https://example.com/",
   },
   {
     name: "KVS Kabaddi Academy",
-    image:
-      "https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=1200&q=80",
+    image: kvsImg,
     description:
-      "A high-energy academy landing page with training highlights, program details, and strong visual hierarchy.",
-    stack: ["React", "UI Design", "Responsive", "Branding"],
-    github: "https://github.com/",
-    live: "https://example.com/",
-  },
-  {
-    name: "MERN Contact Form Project",
-    image:
-      "https://images.unsplash.com/photo-1487017159836-4e23ece2e4cf?auto=format&fit=crop&w=1200&q=80",
-    description:
-      "A practical MERN workflow with form capture, validation, and a clean developer-friendly interface.",
-    stack: ["MongoDB", "Express", "React", "Node"],
+      "A sports academy landing page featuring athletes, training programs, and a strong community-oriented identity.",
+    stack: ["HTML", "CSS", "JavaScript", "Dashboard"],
     github: "https://github.com/",
     live: "https://example.com/",
   },
