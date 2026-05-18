@@ -23,6 +23,7 @@ import arpitImg from "./assets/images/arpit.png";
 import parthrahiImg from "./assets/images/parthrahi.png";
 import airbnbImg from "./assets/images/airbnb.png";
 import kvsImg from "./assets/images/kvs.png";
+import resumePdf from "./assets/Utsav_Resume.pdf";
 
 const navItems = [
   { label: "Home", href: "#home" },
@@ -233,15 +234,10 @@ function App() {
   );
 
   const downloadResume = () => {
-    const resume = `Utsav Raj\nFull Stack Developer | Cloud Computing Student\n\nSummary\n- React and Vite frontend developer focused on premium portfolio and product experiences.\n- Cloud computing student building modern, responsive, and animated interfaces.\n\nSkills\n- React.js, JavaScript, UI Engineering, Framer Motion, Node.js, Express, MongoDB, AWS concepts\n\nSelected Projects\n- Airbnb Clone\n- Workshop Registration Platform\n- Portfolio Website\n- KVS Kabaddi Academy\n- MERN Contact Form Project\n\nContact\n- GitHub: https://github.com/\n- LinkedIn: https://www.linkedin.com/\n`;
-
-    const blob = new Blob([resume], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
-    link.href = url;
-    link.download = "Utsav_Raj_Resume.txt";
+    link.href = resumePdf;
+    link.download = "Utsav_Raj_Resume.pdf";
     link.click();
-    URL.revokeObjectURL(url);
   };
 
   return (
@@ -609,3 +605,5 @@ function App() {
 }
 
 export default App;
+
+
