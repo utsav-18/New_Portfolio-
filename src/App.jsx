@@ -189,10 +189,18 @@ function SectionHeading({ kicker, title, description }) {
 }
 
 function App() {
+  const [isMobile, setIsMobile] = useState(false);
   const { scrollYProgress } = useScroll();
-  const scaleX = useSpring(scrollYProgress, { stiffness: 120, damping: 25, mass: 0.15 });
+  const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, mass: 0.2 });
   const typedLine = useTypingLoop(heroLines);
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const heroEffectOptions = useMemo(
     () => ({
@@ -280,27 +288,27 @@ function App() {
           <div className="hero-content">
             <motion.div
               className="hero-badge"
-              initial={{ opacity: 0, y: 18 }}
+              initial={{ opacity: 0, y: isMobile ? 0 : 18 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7 }}
+              transition={{ duration: isMobile ? 0.3 : 0.7 }}
             >
               <FaLocationArrow />
               <span>Available for opportunities</span>
             </motion.div>
 
             <motion.h1
-              initial={{ opacity: 0, y: 28 }}
+              initial={{ opacity: 0, y: isMobile ? 0 : 28 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.1 }}
+              transition={{ duration: isMobile ? 0.3 : 0.8, delay: isMobile ? 0 : 0.1 }}
             >
               Utsav Raj
             </motion.h1>
 
             <motion.p
               className="hero-subtitle"
-              initial={{ opacity: 0, y: 22 }}
+              initial={{ opacity: 0, y: isMobile ? 0 : 22 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.2 }}
+              transition={{ duration: isMobile ? 0.3 : 0.7, delay: isMobile ? 0 : 0.2 }}
             >
               Full Stack Developer | Cloud Computing Student
             </motion.p>
@@ -317,9 +325,9 @@ function App() {
 
             <motion.div
               className="hero-actions"
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: isMobile ? 0 : 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.35 }}
+              transition={{ duration: isMobile ? 0.3 : 0.7, delay: isMobile ? 0 : 0.35 }}
             >
               <a className="btn btn-primary" href="#projects">
                 View Projects <FaArrowRight />
@@ -331,9 +339,9 @@ function App() {
 
             <motion.div
               className="social-row"
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: isMobile ? 0 : 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.45 }}
+              transition={{ duration: isMobile ? 0.3 : 0.7, delay: isMobile ? 0 : 0.45 }}
             >
               {socialLinks.map((social) => {
                 const Icon = social.icon;
@@ -357,10 +365,10 @@ function App() {
           <div className="about-grid">
             <motion.div
               className="glass-card about-card"
-              initial={{ opacity: 0, x: -28 }}
+              initial={{ opacity: 0, x: isMobile ? 0 : -28 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true, amount: 0.25 }}
-              transition={{ duration: 0.7 }}
+              transition={{ duration: isMobile ? 0.3 : 0.7 }}
             >
               <p>
                 I focus on building interfaces that feel cinematic, but still remain clean, fast, and usable on every screen size.
@@ -378,10 +386,10 @@ function App() {
 
             <motion.div
               className="glass-card about-side"
-              initial={{ opacity: 0, x: 28 }}
+              initial={{ opacity: 0, x: isMobile ? 0 : 28 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true, amount: 0.25 }}
-              transition={{ duration: 0.7 }}
+              transition={{ duration: isMobile ? 0.3 : 0.7 }}
             >
               <div className="about-list">
                 <div>
