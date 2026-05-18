@@ -1,47 +1,600 @@
+import { useEffect, useMemo, useState } from "react";
+import { motion, useScroll, useSpring } from "framer-motion";
+import {
+  FaArrowRight,
+  FaAward,
+  FaCloud,
+  FaCode,
+  FaDownload,
+  FaEnvelope,
+  FaExternalLinkAlt,
+  FaGithub,
+  FaLinkedinIn,
+  FaLocationArrow,
+  FaReact,
+  FaServer,
+  FaTwitter,
+} from "react-icons/fa";
 import Hyperspeed from "./Hyperspeed";
 import "./App.css";
 
-function App() {
+const navItems = [
+  { label: "Home", href: "#home" },
+  { label: "About", href: "#about" },
+  { label: "Skills", href: "#skills" },
+  { label: "Projects", href: "#projects" },
+  { label: "Experience", href: "#experience" },
+  { label: "Contact", href: "#contact" },
+];
+
+const socialLinks = [
+  { label: "GitHub", href: "https://github.com/", icon: FaGithub },
+  { label: "LinkedIn", href: "https://www.linkedin.com/", icon: FaLinkedinIn },
+  { label: "Twitter", href: "https://x.com/", icon: FaTwitter },
+];
+
+const skills = [
+  { name: "React.js", icon: FaReact, tone: "cyan" },
+  { name: "Node.js", icon: FaServer, tone: "blue" },
+  { name: "Cloud Computing", icon: FaCloud, tone: "violet" },
+  { name: "Full Stack Dev", icon: FaCode, tone: "emerald" },
+];
+
+const projects = [
+  {
+    name: "Airbnb Clone",
+    image:
+      "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80",
+    description:
+      "A premium booking experience with property discovery, filters, responsive listings, and a polished checkout flow.",
+    stack: ["React", "Node", "MongoDB", "Express"],
+    github: "https://github.com/",
+    live: "https://example.com/",
+  },
+  {
+    name: "Workshop Registration Platform",
+    image:
+      "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80",
+    description:
+      "A structured event registration system with attendee onboarding, admin controls, and smooth registration UX.",
+    stack: ["React", "Tailwind", "API", "Motion"],
+    github: "https://github.com/",
+    live: "https://example.com/",
+  },
+  {
+    name: "Portfolio Website",
+    image:
+      "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80",
+    description:
+      "A cinematic personal brand site built with layered motion, glassmorphism cards, and full responsiveness.",
+    stack: ["React", "Framer Motion", "CSS", "Icons"],
+    github: "https://github.com/",
+    live: "https://example.com/",
+  },
+  {
+    name: "KVS Kabaddi Academy",
+    image:
+      "https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=1200&q=80",
+    description:
+      "A high-energy academy landing page with training highlights, program details, and strong visual hierarchy.",
+    stack: ["React", "UI Design", "Responsive", "Branding"],
+    github: "https://github.com/",
+    live: "https://example.com/",
+  },
+  {
+    name: "MERN Contact Form Project",
+    image:
+      "https://images.unsplash.com/photo-1487017159836-4e23ece2e4cf?auto=format&fit=crop&w=1200&q=80",
+    description:
+      "A practical MERN workflow with form capture, validation, and a clean developer-friendly interface.",
+    stack: ["MongoDB", "Express", "React", "Node"],
+    github: "https://github.com/",
+    live: "https://example.com/",
+  },
+];
+
+const experience = [
+  {
+    title: "Full Stack Developer",
+    org: "Freelance / Personal Projects",
+    period: "2023 - Present",
+    details:
+      "Building polished React interfaces, API-powered dashboards, and cloud-ready web apps with a strong focus on performance and storytelling.",
+  },
+  {
+    title: "Cloud Computing Student",
+    org: "Academic Track",
+    period: "2022 - Present",
+    details:
+      "Exploring deployment, distributed systems, and infrastructure concepts while translating them into production-minded frontend work.",
+  },
+];
+
+const certifications = [
+  "AWS Cloud Fundamentals",
+  "Frontend Development Specialization",
+  "React & UI Engineering",
+  "MERN Stack Bootcamp",
+];
+
+const stats = [
+  { label: "Projects Built", value: "12+" },
+  { label: "Frontend Focus", value: "React" },
+  { label: "Cloud Interest", value: "AWS" },
+  { label: "Deployment Ready", value: "Yes" },
+];
+
+const heroLines = [
+  "Crafting futuristic web experiences.",
+  "Designing premium interfaces that feel alive.",
+  "Shipping full stack ideas into polished products.",
+];
+
+function useTypingLoop(words, typeSpeed = 70, holdSpeed = 1500) {
+  const [text, setText] = useState("");
+  const [index, setIndex] = useState(0);
+  const [deleting, setDeleting] = useState(false);
+
+  useEffect(() => {
+    const current = words[index % words.length];
+    const delay = deleting ? typeSpeed / 2 : typeSpeed;
+    const timer = setTimeout(() => {
+      if (!deleting) {
+        const nextText = current.slice(0, text.length + 1);
+        setText(nextText);
+        if (nextText === current) {
+          setDeleting(true);
+        }
+      } else {
+        const nextText = current.slice(0, Math.max(text.length - 1, 0));
+        setText(nextText);
+        if (nextText === "") {
+          setDeleting(false);
+          setIndex((value) => value + 1);
+        }
+      }
+    }, text ? delay : holdSpeed);
+
+    return () => clearTimeout(timer);
+  }, [text, deleting, index, words, typeSpeed, holdSpeed]);
+
+  return text;
+}
+
+function SectionHeading({ kicker, title, description }) {
   return (
-    <>
-      <Hyperspeed
-        effectOptions={{
-          distortion: "turbulentDistortion",
-          length: 400,
-          roadWidth: 10,
-          islandWidth: 2,
-          lanesPerRoad: 4,
-          fov: 90,
-          fovSpeedUp: 150,
-          speedUp: 2,
-          carLightsFade: 0.4,
-          totalSideLightSticks: 20,
-          lightPairsPerRoadWay: 40,
-          shoulderLinesWidthPercentage: 0.05,
-          brokenLinesWidthPercentage: 0.1,
-          brokenLinesLengthPercentage: 0.5,
-          lightStickWidth: [0.12, 0.5],
-          lightStickHeight: [1.3, 1.7],
-          movingAwaySpeed: [60, 80],
-          movingCloserSpeed: [-120, -160],
-          carLightsLength: [12, 80],
-          carLightsRadius: [0.05, 0.14],
-          carWidthPercentage: [0.3, 0.5],
-          carShiftX: [-0.8, 0.8],
-          carFloorSeparation: [0, 5],
-          colors: {
-            roadColor: 0x080808,
-            islandColor: 0x0a0a0a,
-            background: 0x000000,
-            shoulderLines: 0xffffff,
-            brokenLines: 0xffffff,
-            leftCars: [0xd856bf, 0x6750a2, 0xc247ac],
-            rightCars: [0x03b3c3, 0x0e5ea5, 0x324555],
-            sticks: 0x03b3c3,
-          },
-        }}
-      />
-    </>
+    <motion.div
+      className="section-heading"
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.3 }}
+      transition={{ duration: 0.6 }}
+    >
+      <span className="section-kicker">{kicker}</span>
+      <h2>{title}</h2>
+      <p>{description}</p>
+    </motion.div>
+  );
+}
+
+function App() {
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, { stiffness: 120, damping: 25, mass: 0.15 });
+  const typedLine = useTypingLoop(heroLines);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const heroEffectOptions = useMemo(
+    () => ({
+      distortion: "deepDistortion",
+      length: 360,
+      roadWidth: 10,
+      islandWidth: 2,
+      lanesPerRoad: 4,
+      fov: 90,
+      fovSpeedUp: 90,
+      speedUp: 1.5,
+      carLightsFade: 0.28,
+      totalSideLightSticks: 16,
+      lightPairsPerRoadWay: 32,
+      shoulderLinesWidthPercentage: 0.05,
+      brokenLinesWidthPercentage: 0.1,
+      brokenLinesLengthPercentage: 0.5,
+      lightStickWidth: [0.12, 0.5],
+      lightStickHeight: [1.3, 1.7],
+      movingAwaySpeed: [42, 60],
+      movingCloserSpeed: [-88, -120],
+      carLightsLength: [10, 62],
+      carLightsRadius: [0.05, 0.14],
+      carWidthPercentage: [0.3, 0.5],
+      carShiftX: [-0.8, 0.8],
+      carFloorSeparation: [0, 5],
+      colors: {
+        roadColor: 0x050505,
+        islandColor: 0x090909,
+        background: 0x000000,
+        shoulderLines: 0x8ab4d8,
+        brokenLines: 0xf4f7fb,
+        leftCars: [0x5f6c85, 0x7d8798, 0xa7b0bd],
+        rightCars: [0x6da7c9, 0x8ec0da, 0xb5d7e8],
+        sticks: 0x9dbbd4,
+      },
+    }),
+    []
+  );
+
+  const downloadResume = () => {
+    const resume = `Utsav Raj\nFull Stack Developer | Cloud Computing Student\n\nSummary\n- React and Vite frontend developer focused on premium portfolio and product experiences.\n- Cloud computing student building modern, responsive, and animated interfaces.\n\nSkills\n- React.js, JavaScript, UI Engineering, Framer Motion, Node.js, Express, MongoDB, AWS concepts\n\nSelected Projects\n- Airbnb Clone\n- Workshop Registration Platform\n- Portfolio Website\n- KVS Kabaddi Academy\n- MERN Contact Form Project\n\nContact\n- GitHub: https://github.com/\n- LinkedIn: https://www.linkedin.com/\n`;
+
+    const blob = new Blob([resume], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "Utsav_Raj_Resume.txt";
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <div className="app-shell">
+      <motion.div className="scroll-progress" style={{ scaleX }} />
+
+      <header className="navbar">
+        <a className="brand" href="#home">
+          <span className="brand-mark">UR</span>
+          <span>Utsav Raj</span>
+        </a>
+
+        <button className="mobile-toggle" onClick={() => setMobileOpen((value) => !value)}>
+          <span />
+          <span />
+        </button>
+
+        <nav className={`nav-links ${mobileOpen ? "open" : ""}`}>
+          {navItems.map((item) => (
+            <a key={item.label} href={item.href} onClick={() => setMobileOpen(false)}>
+              {item.label}
+            </a>
+          ))}
+        </nav>
+      </header>
+
+      <main>
+        <section id="home" className="hero-section">
+          <div className="hero-backdrop" />
+          <div className="hero-grid" />
+          <div className="hero-orb hero-orb-a" />
+          <div className="hero-orb hero-orb-b" />
+
+          <div className="hero-background">
+            <Hyperspeed effectOptions={heroEffectOptions} />
+          </div>
+
+          <div className="hero-overlay" />
+
+          <div className="hero-content">
+            <motion.div
+              className="hero-badge"
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7 }}
+            >
+              <FaLocationArrow />
+              <span>Available for opportunities</span>
+            </motion.div>
+
+            <motion.h1
+              initial={{ opacity: 0, y: 28 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.1 }}
+            >
+              Utsav Raj
+            </motion.h1>
+
+            <motion.p
+              className="hero-subtitle"
+              initial={{ opacity: 0, y: 22 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.2 }}
+            >
+              Full Stack Developer | Cloud Computing Student
+            </motion.p>
+
+            <motion.p
+              className="hero-typing"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.7, delay: 0.3 }}
+            >
+              {typedLine}
+              <span className="typing-cursor">|</span>
+            </motion.p>
+
+            <motion.div
+              className="hero-actions"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.35 }}
+            >
+              <a className="btn btn-primary" href="#projects">
+                View Projects <FaArrowRight />
+              </a>
+              <button className="btn btn-secondary" onClick={downloadResume}>
+                Download Resume <FaDownload />
+              </button>
+            </motion.div>
+
+            <motion.div
+              className="social-row"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.45 }}
+            >
+              {socialLinks.map((social) => {
+                const Icon = social.icon;
+                return (
+                  <a key={social.label} href={social.href} target="_blank" rel="noreferrer" aria-label={social.label}>
+                    <Icon />
+                  </a>
+                );
+              })}
+            </motion.div>
+          </div>
+        </section>
+
+        <section id="about" className="section section-alt">
+          <SectionHeading
+            kicker="About"
+            title="A futuristic builder with a sharp eye for detail"
+            description="I design and build premium frontend experiences with motion, structure, and a strong product mindset."
+          />
+
+          <div className="about-grid">
+            <motion.div
+              className="glass-card about-card"
+              initial={{ opacity: 0, x: -28 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, amount: 0.25 }}
+              transition={{ duration: 0.7 }}
+            >
+              <p>
+                I focus on building interfaces that feel cinematic, but still remain clean, fast, and usable on every screen size.
+                My work blends modern React, scalable component patterns, and a visual style that feels premium.
+              </p>
+              <div className="mini-stats">
+                {stats.map((stat) => (
+                  <div key={stat.label}>
+                    <strong>{stat.value}</strong>
+                    <span>{stat.label}</span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+
+            <motion.div
+              className="glass-card about-side"
+              initial={{ opacity: 0, x: 28 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, amount: 0.25 }}
+              transition={{ duration: 0.7 }}
+            >
+              <div className="about-list">
+                <div>
+                  <FaCode />
+                  <span>Frontend architecture and motion systems</span>
+                </div>
+                <div>
+                  <FaServer />
+                  <span>Full stack apps with practical API design</span>
+                </div>
+                <div>
+                  <FaCloud />
+                  <span>Cloud-ready thinking and deployment awareness</span>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </section>
+
+        <section id="skills" className="section">
+          <SectionHeading
+            kicker="Skills"
+            title="Core technologies"
+            description="A concise stack built for modern portfolio, product, and cloud-focused work."
+          />
+
+          <div className="skills-grid">
+            {skills.map((skill) => {
+              const Icon = skill.icon;
+              return (
+                <motion.article
+                  key={skill.name}
+                  className={`skill-card ${skill.tone}`}
+                  whileHover={{ y: -4, scale: 1.01 }}
+                  transition={{ type: "spring", stiffness: 180, damping: 22 }}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.25 }}
+                >
+                  <Icon />
+                  <h3>{skill.name}</h3>
+                </motion.article>
+              );
+            })}
+          </div>
+        </section>
+
+        <section id="projects" className="section section-alt">
+          <SectionHeading
+            kicker="Projects"
+            title="Selected builds"
+            description="Featured products and concepts with strong UI storytelling, tech clarity, and hover-driven polish."
+          />
+
+          <div className="projects-grid">
+            {projects.map((project) => (
+              <motion.article
+                key={project.name}
+                className="project-card glass-card"
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.18 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+                whileHover={{ y: -5 }}
+              >
+                <div className="project-image-wrap">
+                  <img src={project.image} alt={project.name} />
+                  <div className="project-image-overlay" />
+                </div>
+                <div className="project-content">
+                  <h3>{project.name}</h3>
+                  <p>{project.description}</p>
+                  <div className="tech-badges">
+                    {project.stack.map((item) => (
+                      <span key={item}>{item}</span>
+                    ))}
+                  </div>
+                  <div className="project-links">
+                    <a href={project.github} target="_blank" rel="noreferrer">
+                      <FaGithub /> GitHub
+                    </a>
+                    <a href={project.live} target="_blank" rel="noreferrer">
+                      <FaExternalLinkAlt /> Live Demo
+                    </a>
+                  </div>
+                </div>
+              </motion.article>
+            ))}
+          </div>
+        </section>
+
+        <section id="experience" className="section">
+          <SectionHeading
+            kicker="Experience"
+            title="Professional timeline"
+            description="A concise view of my current direction, combining frontend craftsmanship with cloud-minded learning."
+          />
+
+          <div className="timeline">
+            {experience.map((item) => (
+              <motion.article
+                key={item.title}
+                className="timeline-card glass-card"
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, amount: 0.25 }}
+              >
+                <span className="timeline-period">{item.period}</span>
+                <h3>{item.title}</h3>
+                <strong>{item.org}</strong>
+                <p>{item.details}</p>
+              </motion.article>
+            ))}
+          </div>
+        </section>
+
+        <section id="certifications" className="section section-alt">
+          <SectionHeading
+            kicker="Certifications"
+            title="Learning milestones"
+            description="Formal and self-directed learning that supports modern frontend and cloud work."
+          />
+
+          <div className="cert-grid">
+            {certifications.map((cert) => (
+              <motion.div
+                key={cert}
+                className="glass-card cert-card"
+                whileHover={{ y: -6 }}
+                initial={{ opacity: 0, scale: 0.96 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true, amount: 0.2 }}
+              >
+                <FaAward />
+                <span>{cert}</span>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+
+        <section className="section">
+          <SectionHeading
+            kicker="GitHub Stats"
+            title="Live ecosystem snapshot"
+            description="A compact stats panel that complements the portfolio with a developer-first presence."
+          />
+
+          <div className="github-grid">
+            <div className="glass-card github-card">
+              <img
+                src="https://github-readme-stats.vercel.app/api?username=utsav-18&show_icons=true&theme=tokyonight&hide_border=true&count_private=true"
+                alt="GitHub stats"
+              />
+            </div>
+            <div className="glass-card github-card">
+              <img
+                src="https://github-readme-streak-stats.herokuapp.com/?user=utsav-18&theme=tokyonight&hide_border=true"
+                alt="GitHub streak stats"
+              />
+            </div>
+          </div>
+        </section>
+
+        <section id="contact" className="section section-alt">
+          <SectionHeading
+            kicker="Contact"
+            title="Let’s build something premium"
+            description="If you’re looking for a modern React developer who cares about polish, motion, and clarity, reach out."
+          />
+
+          <div className="contact-grid">
+            <motion.div
+              className="glass-card contact-card"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.25 }}
+            >
+              <h3>Start a conversation</h3>
+              <p>
+                I’m open to internships, freelance builds, product landing pages, and modern full stack interfaces.
+              </p>
+              <div className="contact-actions">
+                <a className="btn btn-primary" href="mailto:utsav@example.com">
+                  <FaEnvelope /> Email Me
+                </a>
+                <a className="btn btn-secondary" href="https://github.com/" target="_blank" rel="noreferrer">
+                  <FaGithub /> GitHub Profile
+                </a>
+              </div>
+            </motion.div>
+
+            <motion.div
+              className="glass-card contact-card contact-meta"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.25 }}
+            >
+              <div>
+                <span>Email</span>
+                <strong>utsav@example.com</strong>
+              </div>
+              <div>
+                <span>Location</span>
+                <strong>India</strong>
+              </div>
+              <div>
+                <span>Focus</span>
+                <strong>React, Motion, Cloud</strong>
+              </div>
+            </motion.div>
+          </div>
+        </section>
+      </main>
+
+      <footer className="footer">
+        <p>© 2026 Utsav Raj. Built with React, Framer Motion, and Hyperspeed.</p>
+        <a href="#home">Back to top</a>
+      </footer>
+    </div>
   );
 }
 
