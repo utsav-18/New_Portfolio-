@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { lazy, memo, Suspense, useEffect, useMemo, useState } from "react";
 import { motion, useScroll, useSpring } from "framer-motion";
 import {
   FaArrowRight,
@@ -15,7 +15,6 @@ import {
   FaServer,
   FaTwitter,
 } from "react-icons/fa";
-import Hyperspeed from "./Hyperspeed";
 import "./App.css";
 import aayrahImg from "./assets/images/aayrah.png";
 import lubImg from "./assets/images/lub.png";
@@ -24,6 +23,8 @@ import parthrahiImg from "./assets/images/parthrahi.png";
 import airbnbImg from "./assets/images/airbnb.png";
 import kvsImg from "./assets/images/kvs.png";
 import resumePdf from "./assets/Utsav_Resume.pdf";
+
+const Hyperspeed = lazy(() => import("./Hyperspeed"));
 
 const navItems = [
   { label: "Home", href: "#home" },
@@ -141,6 +142,33 @@ const heroLines = [
   "Shipping full stack ideas into polished products.",
 ];
 
+function getDeviceProfile() {
+  if (typeof window === "undefined") {
+    return {
+      isMobile: false,
+      canHover: true,
+      lowPower: false,
+    };
+  }
+
+  const isMobile = window.matchMedia("(max-width: 768px)").matches;
+  const canHover = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const saveData = Boolean(navigator.connection && navigator.connection.saveData);
+  const hardwareConcurrency = navigator.hardwareConcurrency ?? 8;
+  const deviceMemory = navigator.deviceMemory ?? 8;
+
+  return {
+    isMobile,
+    canHover,
+    lowPower: isMobile || prefersReducedMotion || saveData || hardwareConcurrency <= 4 || deviceMemory <= 4,
+  };
+}
+
+function profilesMatch(left, right) {
+  return left.isMobile === right.isMobile && left.canHover === right.canHover && left.lowPower === right.lowPower;
+}
+
 function useTypingLoop(words, typeSpeed = 70, holdSpeed = 1500) {
   const [text, setText] = useState("");
   const [index, setIndex] = useState(0);
@@ -172,7 +200,7 @@ function useTypingLoop(words, typeSpeed = 70, holdSpeed = 1500) {
   return text;
 }
 
-function SectionHeading({ kicker, title, description }) {
+const SectionHeading = memo(function SectionHeading({ kicker, title, description }) {
   return (
     <motion.div
       className="section-heading"
@@ -186,59 +214,89 @@ function SectionHeading({ kicker, title, description }) {
       <p>{description}</p>
     </motion.div>
   );
-}
+});
+
+// Keep the typing loop isolated so the rest of the page does not rerender on every character.
+const TypingLine = memo(function TypingLine({ words }) {
+  const typedLine = useTypingLoop(words);
+
+  return (
+    <motion.p className="hero-typing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.7, delay: 0.3 }}>
+      {typedLine}
+      <span className="typing-cursor">|</span>
+    </motion.p>
+  );
+});
 
 function App() {
-  const [isMobile, setIsMobile] = useState(false);
+  const [deviceProfile, setDeviceProfile] = useState(() => getDeviceProfile());
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, mass: 0.2 });
-  const typedLine = useTypingLoop(heroLines);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    const updateProfile = () => {
+      setDeviceProfile((currentProfile) => {
+        const nextProfile = getDeviceProfile();
+        return profilesMatch(currentProfile, nextProfile) ? currentProfile : nextProfile;
+      });
+    };
+
+    updateProfile();
+    window.addEventListener("resize", updateProfile, { passive: true });
+    window.addEventListener("orientationchange", updateProfile);
+
+    return () => {
+      window.removeEventListener("resize", updateProfile);
+      window.removeEventListener("orientationchange", updateProfile);
+    };
   }, []);
 
   const heroEffectOptions = useMemo(
-    () => ({
-      distortion: "deepDistortion",
-      length: 360,
-      roadWidth: 10,
-      islandWidth: 2,
-      lanesPerRoad: 4,
-      fov: 90,
-      fovSpeedUp: 90,
-      speedUp: 1.5,
-      carLightsFade: 0.28,
-      totalSideLightSticks: 16,
-      lightPairsPerRoadWay: 32,
-      shoulderLinesWidthPercentage: 0.05,
-      brokenLinesWidthPercentage: 0.1,
-      brokenLinesLengthPercentage: 0.5,
-      lightStickWidth: [0.12, 0.5],
-      lightStickHeight: [1.3, 1.7],
-      movingAwaySpeed: [42, 60],
-      movingCloserSpeed: [-88, -120],
-      carLightsLength: [10, 62],
-      carLightsRadius: [0.05, 0.14],
-      carWidthPercentage: [0.3, 0.5],
-      carShiftX: [-0.8, 0.8],
-      carFloorSeparation: [0, 5],
-      colors: {
-        roadColor: 0x06070c,
-        islandColor: 0x0a0f18,
-        background: 0x000000,
-        shoulderLines: 0xa3e8ff,
-        brokenLines: 0xffffff,
-        leftCars: [0x8b5cf6, 0xff4fd8, 0x0ea5e9],
-        rightCars: [0x22d3ee, 0x38bdf8, 0x60a5fa],
-        sticks: 0x22d3ee,
-      },
-    }),
-    []
+    () => {
+      const simplified = deviceProfile.lowPower;
+
+      return {
+        distortion: simplified ? "deepDistortionStill" : "deepDistortion",
+        length: simplified ? 220 : 360,
+        roadWidth: simplified ? 8 : 10,
+        islandWidth: simplified ? 1.4 : 2,
+        lanesPerRoad: simplified ? 3 : 4,
+        fov: simplified ? 72 : 90,
+        fovSpeedUp: simplified ? 78 : 90,
+        speedUp: simplified ? 1.05 : 1.5,
+        carLightsFade: simplified ? 0.18 : 0.28,
+        totalSideLightSticks: simplified ? 8 : 16,
+        lightPairsPerRoadWay: simplified ? 10 : 32,
+        shoulderLinesWidthPercentage: 0.05,
+        brokenLinesWidthPercentage: 0.1,
+        brokenLinesLengthPercentage: 0.5,
+        lightStickWidth: simplified ? [0.1, 0.36] : [0.12, 0.5],
+        lightStickHeight: simplified ? [1.1, 1.45] : [1.3, 1.7],
+        movingAwaySpeed: simplified ? [28, 40] : [42, 60],
+        movingCloserSpeed: simplified ? [-64, -92] : [-88, -120],
+        carLightsLength: simplified ? [8, 28] : [10, 62],
+        carLightsRadius: simplified ? [0.04, 0.1] : [0.05, 0.14],
+        carWidthPercentage: simplified ? [0.28, 0.42] : [0.3, 0.5],
+        carShiftX: simplified ? [-0.35, 0.35] : [-0.8, 0.8],
+        carFloorSeparation: simplified ? [0, 3] : [0, 5],
+        roadSegments: simplified ? 52 : 100,
+        carGeometrySegments: simplified ? 20 : 40,
+        enablePostProcessing: !simplified,
+        pixelRatioCap: simplified ? 1 : 1.5,
+        colors: {
+          roadColor: 0x06070c,
+          islandColor: 0x0a0f18,
+          background: 0x000000,
+          shoulderLines: 0xa3e8ff,
+          brokenLines: 0xffffff,
+          leftCars: [0x8b5cf6, 0xff4fd8, 0x0ea5e9],
+          rightCars: [0x22d3ee, 0x38bdf8, 0x60a5fa],
+          sticks: 0x22d3ee,
+        },
+      };
+    },
+    [deviceProfile.lowPower]
   );
 
   const downloadResume = () => {
@@ -280,7 +338,10 @@ function App() {
           <div className="hero-orb hero-orb-b" />
 
           <div className="hero-background">
-            <Hyperspeed effectOptions={heroEffectOptions} />
+            {/* Load the WebGL background lazily so the first paint stays light on mobile. */}
+            <Suspense fallback={<div className="hero-background-fallback" aria-hidden="true" />}>
+              <Hyperspeed effectOptions={heroEffectOptions} />
+            </Suspense>
           </div>
 
           <div className="hero-overlay" />
@@ -288,46 +349,38 @@ function App() {
           <div className="hero-content">
             <motion.div
               className="hero-badge"
-              initial={{ opacity: 0, y: isMobile ? 0 : 18 }}
+              initial={{ opacity: 0, y: deviceProfile.isMobile ? 0 : 18 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: isMobile ? 0.3 : 0.7 }}
+              transition={{ duration: deviceProfile.isMobile ? 0.3 : 0.7 }}
             >
               <FaLocationArrow />
               <span>Available for opportunities</span>
             </motion.div>
 
             <motion.h1
-              initial={{ opacity: 0, y: isMobile ? 0 : 28 }}
+              initial={{ opacity: 0, y: deviceProfile.isMobile ? 0 : 28 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: isMobile ? 0.3 : 0.8, delay: isMobile ? 0 : 0.1 }}
+              transition={{ duration: deviceProfile.isMobile ? 0.3 : 0.8, delay: deviceProfile.isMobile ? 0 : 0.1 }}
             >
               Utsav Raj
             </motion.h1>
 
             <motion.p
               className="hero-subtitle"
-              initial={{ opacity: 0, y: isMobile ? 0 : 22 }}
+              initial={{ opacity: 0, y: deviceProfile.isMobile ? 0 : 22 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: isMobile ? 0.3 : 0.7, delay: isMobile ? 0 : 0.2 }}
+              transition={{ duration: deviceProfile.isMobile ? 0.3 : 0.7, delay: deviceProfile.isMobile ? 0 : 0.2 }}
             >
               Full Stack Developer | Cloud Computing Student
             </motion.p>
 
-            <motion.p
-              className="hero-typing"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.7, delay: 0.3 }}
-            >
-              {typedLine}
-              <span className="typing-cursor">|</span>
-            </motion.p>
+            <TypingLine words={heroLines} />
 
             <motion.div
               className="hero-actions"
-              initial={{ opacity: 0, y: isMobile ? 0 : 20 }}
+              initial={{ opacity: 0, y: deviceProfile.isMobile ? 0 : 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: isMobile ? 0.3 : 0.7, delay: isMobile ? 0 : 0.35 }}
+              transition={{ duration: deviceProfile.isMobile ? 0.3 : 0.7, delay: deviceProfile.isMobile ? 0 : 0.35 }}
             >
               <a className="btn btn-primary" href="#projects">
                 View Projects <FaArrowRight />
@@ -339,9 +392,9 @@ function App() {
 
             <motion.div
               className="social-row"
-              initial={{ opacity: 0, y: isMobile ? 0 : 20 }}
+              initial={{ opacity: 0, y: deviceProfile.isMobile ? 0 : 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: isMobile ? 0.3 : 0.7, delay: isMobile ? 0 : 0.45 }}
+              transition={{ duration: deviceProfile.isMobile ? 0.3 : 0.7, delay: deviceProfile.isMobile ? 0 : 0.45 }}
             >
               {socialLinks.map((social) => {
                 const Icon = social.icon;
@@ -365,10 +418,10 @@ function App() {
           <div className="about-grid">
             <motion.div
               className="glass-card about-card"
-              initial={{ opacity: 0, x: isMobile ? 0 : -28 }}
+              initial={{ opacity: 0, x: deviceProfile.isMobile ? 0 : -28 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true, amount: 0.25 }}
-              transition={{ duration: isMobile ? 0.3 : 0.7 }}
+              transition={{ duration: deviceProfile.isMobile ? 0.3 : 0.7 }}
             >
               <p>
                 I focus on building interfaces that feel cinematic, but still remain clean, fast, and usable on every screen size.
@@ -386,10 +439,10 @@ function App() {
 
             <motion.div
               className="glass-card about-side"
-              initial={{ opacity: 0, x: isMobile ? 0 : 28 }}
+              initial={{ opacity: 0, x: deviceProfile.isMobile ? 0 : 28 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true, amount: 0.25 }}
-              transition={{ duration: isMobile ? 0.3 : 0.7 }}
+              transition={{ duration: deviceProfile.isMobile ? 0.3 : 0.7 }}
             >
               <div className="about-list">
                 <div>
@@ -423,7 +476,7 @@ function App() {
                 <motion.article
                   key={skill.name}
                   className={`skill-card ${skill.tone}`}
-                  whileHover={{ y: -4, scale: 1.01 }}
+                  whileHover={deviceProfile.canHover ? { y: -4, scale: 1.01 } : undefined}
                   transition={{ type: "spring", stiffness: 180, damping: 22 }}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -453,10 +506,10 @@ function App() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.18 }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
-                whileHover={{ y: -5 }}
+                whileHover={deviceProfile.canHover ? { y: -5 } : undefined}
               >
                 <div className="project-image-wrap">
-                  <img src={project.image} alt={project.name} />
+                  <img src={project.image} alt={project.name} loading="lazy" decoding="async" />
                   <div className="project-image-overlay" />
                 </div>
                 <div className="project-content">
@@ -518,7 +571,7 @@ function App() {
               <motion.div
                 key={cert}
                 className="glass-card cert-card"
-                whileHover={{ y: -6 }}
+                whileHover={deviceProfile.canHover ? { y: -6 } : undefined}
                 initial={{ opacity: 0, scale: 0.96 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true, amount: 0.2 }}
@@ -542,12 +595,16 @@ function App() {
               <img
                 src="https://github-readme-stats.vercel.app/api?username=utsav-18&show_icons=true&theme=tokyonight&hide_border=true&count_private=true"
                 alt="GitHub stats"
+                loading="lazy"
+                decoding="async"
               />
             </div>
             <div className="glass-card github-card">
               <img
                 src="https://github-readme-streak-stats.herokuapp.com/?user=utsav-18&theme=tokyonight&hide_border=true"
                 alt="GitHub streak stats"
+                loading="lazy"
+                decoding="async"
               />
             </div>
           </div>

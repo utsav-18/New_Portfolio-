@@ -7,6 +7,8 @@ import './Hyperspeed.css';
 const DEFAULT_EFFECT_OPTIONS = {
   onSpeedUp: () => {},
   onSlowDown: () => {},
+  enablePostProcessing: true,
+  pixelRatioCap: 1.5,
   distortion: 'turbulentDistortion',
   length: 400,
   roadWidth: 10,
@@ -30,6 +32,8 @@ const DEFAULT_EFFECT_OPTIONS = {
   carWidthPercentage: [0.3, 0.5],
   carShiftX: [-0.8, 0.8],
   carFloorSeparation: [0, 5],
+  roadSegments: 100,
+  carGeometrySegments: 40,
   colors: {
     roadColor: 0x080808,
     islandColor: 0x0a0a0a,
@@ -344,6 +348,9 @@ const Hyperspeed = ({ effectOptions = DEFAULT_EFFECT_OPTIONS }) => {
     class App {
       constructor(container, options = {}) {
         this.options = options;
+        // Mobile devices get a lower DPR and no postprocessing to keep frame times stable.
+        this.usePostProcessing = this.options.enablePostProcessing !== false;
+        this.pixelRatioCap = this.options.pixelRatioCap ?? 1.5;
         if (this.options.distortion == null) {
           this.options.distortion = {
             uniforms: distortion_uniforms,
@@ -361,8 +368,8 @@ const Hyperspeed = ({ effectOptions = DEFAULT_EFFECT_OPTIONS }) => {
           alpha: true
         });
         this.renderer.setSize(initW, initH, false);
-        this.renderer.setPixelRatio(window.devicePixelRatio);
-        this.composer = new EffectComposer(this.renderer);
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, this.pixelRatioCap));
+        this.composer = this.usePostProcessing ? new EffectComposer(this.renderer) : null;
         container.append(this.renderer.domElement);
 
         this.camera = new THREE.PerspectiveCamera(options.fov, initW / initH, 0.1, 10000);
@@ -382,6 +389,7 @@ const Hyperspeed = ({ effectOptions = DEFAULT_EFFECT_OPTIONS }) => {
         this.clock = new THREE.Clock();
         this.assets = {};
         this.disposed = false;
+        this.isPageVisible = document.visibilityState !== 'hidden';
 
         this.road = new Road(this, options);
         this.leftCarLights = new CarLights(
@@ -414,9 +422,11 @@ const Hyperspeed = ({ effectOptions = DEFAULT_EFFECT_OPTIONS }) => {
         this.onTouchStart = this.onTouchStart.bind(this);
         this.onTouchEnd = this.onTouchEnd.bind(this);
         this.onContextMenu = this.onContextMenu.bind(this);
+        this.onVisibilityChange = this.onVisibilityChange.bind(this);
 
         this.onWindowResize = this.onWindowResize.bind(this);
         window.addEventListener('resize', this.onWindowResize);
+        document.addEventListener('visibilitychange', this.onVisibilityChange);
 
         if (container.offsetWidth > 0 && container.offsetHeight > 0) {
           this.hasValidSize = true;
@@ -435,11 +445,21 @@ const Hyperspeed = ({ effectOptions = DEFAULT_EFFECT_OPTIONS }) => {
         this.renderer.setSize(width, height);
         this.camera.aspect = width / height;
         this.camera.updateProjectionMatrix();
-        this.composer.setSize(width, height);
+        if (this.composer) {
+          this.composer.setSize(width, height);
+        }
         this.hasValidSize = true;
       }
 
+      onVisibilityChange() {
+        this.isPageVisible = document.visibilityState !== 'hidden';
+      }
+
       initPasses() {
+        if (!this.usePostProcessing) {
+          return;
+        }
+
         this.renderPass = new RenderPass(this.scene, this.camera);
         this.bloomPass = new EffectPass(
           this.camera,
@@ -581,7 +601,12 @@ const Hyperspeed = ({ effectOptions = DEFAULT_EFFECT_OPTIONS }) => {
       }
 
       render(delta) {
-        this.composer.render(delta);
+        if (this.composer) {
+          this.composer.render(delta);
+          return;
+        }
+
+        this.renderer.render(this.scene, this.camera);
       }
 
       dispose() {
@@ -617,6 +642,7 @@ const Hyperspeed = ({ effectOptions = DEFAULT_EFFECT_OPTIONS }) => {
         }
 
         window.removeEventListener('resize', this.onWindowResize);
+        document.removeEventListener('visibilitychange', this.onVisibilityChange);
         if (this.container) {
           this.container.removeEventListener('mousedown', this.onMouseDown);
           this.container.removeEventListener('mouseup', this.onMouseUp);
@@ -634,12 +660,22 @@ const Hyperspeed = ({ effectOptions = DEFAULT_EFFECT_OPTIONS }) => {
           this.hasValidSize = false;
           return;
         }
-        this.composer.setSize(width, height, updateStyles);
+        if (this.composer) {
+          this.composer.setSize(width, height, updateStyles);
+        } else {
+          this.renderer.setSize(width, height, updateStyles);
+        }
         this.hasValidSize = true;
       }
 
       tick() {
         if (this.disposed) return;
+
+        // Skip rendering entirely while hidden so the canvas does not waste battery in the background.
+        if (!this.isPageVisible) {
+          requestAnimationFrame(this.tick);
+          return;
+        }
 
         if (!this.hasValidSize) {
           const w = this.container.offsetWidth;
@@ -648,7 +684,9 @@ const Hyperspeed = ({ effectOptions = DEFAULT_EFFECT_OPTIONS }) => {
             this.renderer.setSize(w, h, false);
             this.camera.aspect = w / h;
             this.camera.updateProjectionMatrix();
-            this.composer.setSize(w, h);
+            if (this.composer) {
+              this.composer.setSize(w, h);
+            }
             this.hasValidSize = true;
           } else {
             requestAnimationFrame(this.tick);
@@ -729,8 +767,8 @@ const Hyperspeed = ({ effectOptions = DEFAULT_EFFECT_OPTIONS }) => {
 
       init() {
         const options = this.options;
-        let curve = new THREE.LineCurve3(new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, -1));
-        let geometry = new THREE.TubeGeometry(curve, 40, 1, 8, false);
+        const curve = new THREE.LineCurve3(new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, -1));
+        const geometry = new THREE.TubeGeometry(curve, options.carGeometrySegments ?? 40, 1, 8, false);
 
         let instanced = new THREE.InstancedBufferGeometry().copy(geometry);
         instanced.instanceCount = options.lightPairsPerRoadWay * 2;
@@ -1011,7 +1049,7 @@ const Hyperspeed = ({ effectOptions = DEFAULT_EFFECT_OPTIONS }) => {
 
       createPlane(side, width, isRoad) {
         const options = this.options;
-        let segments = 100;
+        const segments = options.roadSegments ?? 100;
         const geometry = new THREE.PlaneGeometry(
           isRoad ? options.roadWidth : options.islandWidth,
           options.length,
