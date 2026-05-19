@@ -55,8 +55,8 @@ const projects = [
     description:
       "A registration-focused landing page for a training workshop with premium hero content, strong CTAs, and polished UI flow.",
     stack: ["HTML", "CSS", "JavaScript", "Node.js"],
-    github: "https://github.com/",
-    live: "https://example.com/",
+    github: "https://github.com/utsav-18/NodeAndRazorpay",
+    live: "https://workshop.aayrahtech.com/",
   },
   {
     name: "Industrial Lubrication System",
@@ -64,8 +64,8 @@ const projects = [
     description:
       "An industrial product website showcasing lubrication systems, quotation flow, and a clear service-led presentation.",
     stack: ["React", "Responsive UI", "Branding", "Layout"],
-    github: "https://github.com/",
-    live: "https://example.com/",
+    github: "https://github.com/Muskan-3/Industrial_lubrication_system",
+    live: "https://nikslubrication.in/",
   },
   {
     name: "Optimize with Arpit",
@@ -73,8 +73,8 @@ const projects = [
     description:
       "A marketing-focused portfolio for a growth consultant, built to highlight services, credibility, and conversion.",
     stack: ["HTML", "CSS", "Performance", "UI/UX"],
-    github: "https://github.com/",
-    live: "https://example.com/",
+    github: "https://github.com/utsav-18/The_Portfolio",
+    live: "https://optimizewitharpit.com/",
   },
   {
     name: "Parth Rahi",
@@ -82,8 +82,8 @@ const projects = [
     description:
       "A mobility and ride-booking concept with a bold hero, simple navigation, and app-download style actions.",
     stack: ["React", "Landing Page", "Motion", "Branding"],
-    github: "https://github.com/",
-    live: "https://example.com/",
+    github: "https://github.com/utsav-18/ParthRahi",
+    live: "https://parthrahi.com/",
   },
   {
     name: "Mini Airbnb",
@@ -91,8 +91,8 @@ const projects = [
     description:
       "A listings experience inspired by Airbnb, with browseable cards, destination imagery, and a clean marketplace feel.",
     stack: ["React", "Listings", "MongoDB", "Express"],
-    github: "https://github.com/",
-    live: "https://example.com/",
+    github: "https://github.com/utsav-18/Mini-Airbnb",
+    live: "https://mini-airbnb-izxb.onrender.com",
   },
   {
     name: "KVS Kabaddi Academy",
@@ -100,7 +100,7 @@ const projects = [
     description:
       "A sports academy landing page featuring athletes, training programs, and a strong community-oriented identity.",
     stack: ["HTML", "CSS", "JavaScript", "Dashboard"],
-    github: "https://github.com/",
+    github: "https://github.com/utsav-18/Kabaddi-Academy",
     live: "https://example.com/",
   },
 ];
