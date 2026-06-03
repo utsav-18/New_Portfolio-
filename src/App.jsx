@@ -217,13 +217,14 @@ const SectionHeading = memo(function SectionHeading({ kicker, title, description
 });
 
 // Keep the typing loop isolated so the rest of the page does not rerender on every character.
-const TypingLine = memo(function TypingLine({ words }) {
+const TypingLine = memo(function TypingLine({ words, reducedMotion }) {
   const typedLine = useTypingLoop(words);
+  const displayText = reducedMotion ? words[0] : typedLine;
 
   return (
     <motion.p className="hero-typing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.7, delay: 0.3 }}>
-      {typedLine}
-      <span className="typing-cursor">|</span>
+      {displayText}
+      {!reducedMotion ? <span className="typing-cursor">|</span> : null}
     </motion.p>
   );
 });
@@ -374,7 +375,7 @@ function App() {
               Full Stack Developer | Cloud Computing Student
             </motion.p>
 
-            <TypingLine words={heroLines} />
+            <TypingLine words={heroLines} reducedMotion={deviceProfile.lowPower} />
 
             <motion.div
               className="hero-actions"
