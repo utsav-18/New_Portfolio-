@@ -351,9 +351,18 @@ function App() {
           <div className="hero-content">
             <motion.div
               className="hero-portrait"
-              initial={{ opacity: 0, scale: 0.92 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: deviceProfile.isMobile ? 0.35 : 0.7 }}
+              initial={{ opacity: 0, scale: 0.92, y: 8 }}
+              animate={{ opacity: 1, scale: 1, y: [0, -6, 0] }}
+              transition={{
+                opacity: { duration: 0.45 },
+                scale: { duration: deviceProfile.isMobile ? 0.35 : 0.7 },
+                y: {
+                  duration: deviceProfile.lowPower ? 4.8 : 3.2,
+                  repeat: Infinity,
+                  repeatType: "mirror",
+                  ease: "easeInOut",
+                },
+              }}
             >
               <div className="hero-portrait-frame">
                 <img src={profilePic} alt="Utsav Raj portrait" loading="eager" decoding="async" />
