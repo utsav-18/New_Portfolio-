@@ -22,6 +22,7 @@ import arpitImg from "./assets/images/arpit.png";
 import parthrahiImg from "./assets/images/parthrahi.png";
 import airbnbImg from "./assets/images/airbnb.png";
 import kvsImg from "./assets/images/kvs.png";
+import profilePic from "./assets/images/profile-pic.png";
 import resumePdf from "./assets/Utsav_Resume.pdf";
 
 const Hyperspeed = lazy(() => import("./Hyperspeed"));
@@ -348,6 +349,17 @@ function App() {
           <div className="hero-overlay" />
 
           <div className="hero-content">
+            <motion.div
+              className="hero-portrait"
+              initial={{ opacity: 0, scale: 0.92 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: deviceProfile.isMobile ? 0.35 : 0.7 }}
+            >
+              <div className="hero-portrait-frame">
+                <img src={profilePic} alt="Utsav Raj portrait" loading="eager" decoding="async" />
+              </div>
+            </motion.div>
+
             <motion.div
               className="hero-badge"
               initial={{ opacity: 0, y: deviceProfile.isMobile ? 0 : 18 }}
